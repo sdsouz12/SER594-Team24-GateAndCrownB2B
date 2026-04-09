@@ -94,7 +94,9 @@ Start backend first.
 Then run:
 
 cd frontend-client
+
 npm install
+
 npm run dev
 
 Frontend runs at:

@@ -1,0 +1,4 @@
+# Ignore the imported project directory for all git operations
+
+frontend-client/node_modules/
+frontend-client/dist/

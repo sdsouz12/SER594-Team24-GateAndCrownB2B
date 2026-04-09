@@ -1,0 +1,1 @@
+ALTER TABLE bay_organization ADD COLUMN IF NOT EXISTS logo_url VARCHAR(512);

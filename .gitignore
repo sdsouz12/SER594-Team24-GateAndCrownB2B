@@ -8,3 +8,5 @@ frontend-client/dist/
 AI-service/venv/
 AI-service/__pycache__/
 AI-service/*.pyc
+.DS_Store
+**/.DS_Store

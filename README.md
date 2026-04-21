@@ -27,6 +27,7 @@ brew install pgvector
 ```
 
 Then enable it in PostgreSQL:
+Ensure that the Postgres version that you have is 17 or above
 
 ```bash
 psql postgres -c "CREATE EXTENSION IF NOT EXISTS vector;"

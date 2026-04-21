@@ -86,6 +86,11 @@ The AI service handles vector search, LLM assistant, and RAG using Python.
 
 ### Create conda environment
 
+Make sure you have anaconda installed:
+
+```bash
+brew install --cask miniconda
+```
 ```bash
 conda create -n gatecrown python=3.11 -y
 conda activate gatecrown

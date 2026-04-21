@@ -43,6 +43,7 @@ cp backend-service/.env.example backend-service/.env
 ```
 
 Open `backend-service/.env` and set your database credentials:
+open backend-service/.env
 
 ```
 DATABASE_URL=postgresql://localhost:5432/gate_crown

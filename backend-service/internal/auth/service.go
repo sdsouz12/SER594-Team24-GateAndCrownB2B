@@ -1,3 +1,4 @@
+package projects
 package auth
 
 import (
@@ -167,8 +168,20 @@ func (s *Service) UpdateMe(ctx context.Context, userId int64, req *UpdateMeReque
 
 // Register creates a new CLIENT user account.
 func (s *Service) Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error) {
-	// should impl by PIN
-	return nil, nil
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("hash password: %w", err)
+	}
+	userId, err := s.repo.CreateUser(ctx, req.Username, string(hash), req.FullName, req.Email, req.OrganizationId)
+	if err != nil {
+		return nil, err
+	}
+	return &RegisterResponse{
+		UserId:   userId,
+		Username: req.Username,
+		FullName: req.FullName,
+		Role:     "CLIENT",
+	}, nil
 }
 
 // ValidateToken validates JWT token and returns claims

@@ -14,7 +14,28 @@ const error = ref('')
 const success = ref(false)
 
 async function onSubmit(e) {
-  // should impl by shanon
+  e.preventDefault()
+  error.value = ''
+  loading.value = true
+  try {
+    await registerRequest({
+      username: username.value.trim(),
+      password: password.value,
+      fullName: fullName.value.trim(),
+      email: email.value.trim() || undefined,
+    })
+    success.value = true
+    setTimeout(() => router.push({ name: 'Login' }), 1500)
+  } catch (err) {
+    error.value =
+      err?.status === 409
+        ? (err?.data?.error || 'Username or email already taken.')
+        : err instanceof Error && err.message
+          ? err.message
+          : 'Registration failed. Please try again.'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

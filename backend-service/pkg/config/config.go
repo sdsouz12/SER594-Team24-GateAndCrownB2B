@@ -14,8 +14,9 @@ type Config struct {
 	JWTSecret          string
 	JWTExpirationHours int
 	// FrontendURL is a comma-separated list of allowed browser origins for CORS.
-	FrontendURL string
-	Environment string
+	FrontendURL  string
+	Environment  string
+	AIServiceURL string
 }
 
 func Load() *Config {
@@ -36,8 +37,9 @@ func Load() *Config {
 		DatabaseURL:        getEnv("DATABASE_URL", ""),
 		JWTSecret:          getEnv("JWT_SECRET", ""),
 		JWTExpirationHours: expirationHours,
-		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:5173"),
-		Environment: getEnv("ENV", "development"),
+		FrontendURL:  getEnv("FRONTEND_URL", "http://localhost:5173"),
+		Environment:  getEnv("ENV", "development"),
+		AIServiceURL: getEnv("AI_SERVICE_URL", "http://localhost:8001"),
 	}
 }
 

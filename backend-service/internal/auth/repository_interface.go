@@ -10,4 +10,6 @@ type IRepository interface {
 
 	GetPasswordHashByUserId(ctx context.Context, userId int64) (string, error)
 	UpdateMyProfile(ctx context.Context, userId int64, fullName, email, phone *string, passwordHash *string) error
+
+	CreateUser(ctx context.Context, username, passwordHash, fullName string, email *string, organizationId *int64) (int64, error)
 }

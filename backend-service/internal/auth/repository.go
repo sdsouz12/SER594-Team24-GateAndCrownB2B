@@ -163,6 +163,29 @@ func (r *Repository) UpdateMyProfile(ctx context.Context, userId int64, fullName
 	return nil
 }
 
+// CreateUser inserts a new CLIENT user and returns the new user_id.
+func (r *Repository) CreateUser(ctx context.Context, username, passwordHash, fullName string, email *string, organizationId *int64) (int64, error) {
+	var userId int64
+	err := r.db.QueryRow(ctx, `
+		INSERT INTO sys_user (username, password_hash, full_name, email, primary_role_id, organization_id, status)
+		VALUES ($1, $2, $3, $4, 'CLIENT', $5, 'active')
+		RETURNING user_id
+	`, username, passwordHash, fullName, email, organizationId).Scan(&userId)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			if strings.Contains(pgErr.ConstraintName, "username") {
+				return 0, ErrUsernameTaken
+			}
+			if strings.Contains(pgErr.ConstraintName, "email") {
+				return 0, ErrDuplicateEmail
+			}
+		}
+		return 0, fmt.Errorf("create user: %w", err)
+	}
+	return userId, nil
+}
+
 // GetUserRoles retrieves all role slugs for a user
 func (r *Repository) GetUserRoles(ctx context.Context, userId int64) ([]string, error) {
 	query := `

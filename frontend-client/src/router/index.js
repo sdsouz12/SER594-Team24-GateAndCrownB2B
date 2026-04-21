@@ -10,6 +10,12 @@ const routes = [
     meta: { guest: true },
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/RegisterView.vue'),
+    meta: { guest: true },
+  },
+  {
     path: '/',
     component: AppLayout,
     children: [
@@ -17,6 +23,11 @@ const routes = [
         path: '',
         name: 'Home',
         component: () => import('../views/HomeView.vue'),
+      },
+      {
+        path: 'catalog',
+        name: 'Catalog',
+        component: () => import('../views/CatalogView.vue'),
       },
       {
         path: 'welcome',

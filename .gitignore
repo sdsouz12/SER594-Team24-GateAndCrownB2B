@@ -1,4 +1,10 @@
 # Ignore the imported project directory for all git operations
+imported-backend/
 
 frontend-client/node_modules/
 frontend-client/dist/
+
+# Virtual environments
+AI-service/venv/
+AI-service/__pycache__/
+AI-service/*.pyc

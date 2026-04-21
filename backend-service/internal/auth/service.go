@@ -165,6 +165,12 @@ func (s *Service) UpdateMe(ctx context.Context, userId int64, req *UpdateMeReque
 	return s.repo.GetUserWithOrgById(ctx, userId)
 }
 
+// Register creates a new CLIENT user account.
+func (s *Service) Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error) {
+	// should impl by PIN
+	return nil, nil
+}
+
 // ValidateToken validates JWT token and returns claims
 func (s *Service) ValidateToken(tokenString string) (*JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {

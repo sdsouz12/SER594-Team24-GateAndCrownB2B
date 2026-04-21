@@ -51,6 +51,30 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// Register handles POST /auth/register
+func (h *Handler) Register(c *gin.Context) {
+	var req RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	resp, err := h.service.Register(c.Request.Context(), &req)
+	if err != nil {
+		switch err {
+		case ErrUsernameTaken:
+			c.JSON(http.StatusConflict, gin.H{"error": "Username is already taken"})
+		case ErrDuplicateEmail:
+			c.JSON(http.StatusConflict, gin.H{"error": "Email is already taken"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Registration failed"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"data": resp})
+}
+
 // GetMe handles GET /auth/me
 func (h *Handler) GetMe(c *gin.Context) {
 	caller, ok := ctxutil.GetCaller(c)

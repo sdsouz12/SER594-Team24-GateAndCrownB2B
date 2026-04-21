@@ -9,9 +9,14 @@ const { isLoggedIn, user, logout } = useAuth()
     <header
       class="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm"
     >
-      <RouterLink to="/" class="text-lg font-semibold tracking-tight text-gray-900">
-        Gate Crown
-      </RouterLink>
+      <div class="flex items-center gap-4">
+        <RouterLink to="/" class="text-lg font-semibold tracking-tight text-gray-900">
+          Gate Crown
+        </RouterLink>
+        <RouterLink to="/catalog" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+          Catalog
+        </RouterLink>
+      </div>
       <div class="flex items-center gap-3">
         <template v-if="isLoggedIn">
           <span class="hidden text-sm text-gray-600 sm:inline">{{ user?.username }}</span>
@@ -29,13 +34,20 @@ const { isLoggedIn, user, logout } = useAuth()
             Sign out
           </button>
         </template>
-        <RouterLink
-          v-else
-          :to="{ name: 'Login', query: { redirect: '/welcome' } }"
-          class="text-sm font-medium text-emerald-600 hover:text-emerald-700"
-        >
-          Sign in
-        </RouterLink>
+        <template v-else>
+          <RouterLink
+            :to="{ name: 'Register' }"
+            class="text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            Register
+          </RouterLink>
+          <RouterLink
+            :to="{ name: 'Login', query: { redirect: '/welcome' } }"
+            class="text-sm font-medium text-emerald-600 hover:text-emerald-700"
+          >
+            Sign in
+          </RouterLink>
+        </template>
       </div>
     </header>
 

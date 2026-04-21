@@ -8,4 +8,5 @@ type IService interface {
 	ValidateToken(tokenString string) (*JWTClaims, error)
 	GetMe(ctx context.Context, userId int64) (*MeResponse, error)
 	UpdateMe(ctx context.Context, userId int64, req *UpdateMeRequest) (*MeResponse, error)
+	Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error)
 }

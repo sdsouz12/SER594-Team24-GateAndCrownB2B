@@ -59,6 +59,21 @@ type MeResponse struct {
 	UpdatedAt    time.Time         `json:"updatedAt"`
 }
 
+type RegisterRequest struct {
+	Username       string  `json:"username" binding:"required,min=3,max=50"`
+	Password       string  `json:"password" binding:"required,min=8"`
+	FullName       string  `json:"fullName" binding:"required"`
+	Email          *string `json:"email"`
+	OrganizationId *int64  `json:"organizationId"`
+}
+
+type RegisterResponse struct {
+	UserId   int64  `json:"userId"`
+	Username string `json:"username"`
+	FullName string `json:"fullName"`
+	Role     string `json:"role"`
+}
+
 // UpdateMeRequest is the body for PATCH /api/auth/me. Omitted keys are left unchanged.
 // To change password, send both currentPassword and newPassword (min 8 chars).
 type UpdateMeRequest struct {

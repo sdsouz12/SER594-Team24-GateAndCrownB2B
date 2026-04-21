@@ -1,174 +1,228 @@
 # Gate & Crown B2B Platform
 
-Repository:
-https://github.com/sdsouz12/SER594-Team24-GateAndCrownB2B
+SER 594 — AI for Software Engineers | Milestone 2
 
-Gate & Crown is a full-stack B2B ordering platform built using Go (Gin) and Vue 3, providing secure authentication, PostgreSQL persistence, and REST-based communication between frontend and backend services.
+Full-stack B2B ordering platform with semantic search, LLM order assistant, and RAG — built with Go, Vue 3, and Python (FastAPI).
 
-
-## Tech Stack
-
-### Backend
-- Go 1.25+
-- Gin (HTTP framework)
-- PostgreSQL (pgx driver)
-- REST / JSON API
-- golang-migrate (SQL migrations)
-- JWT authentication
-- bcrypt password hashing
-
-### Frontend
-- Vue 3
-- Vue Router
-- Vite
-- Tailwind CSS v4
-- Native Fetch API
-
+---
 
 ## Requirements
 
-Install before running the project:
+Before starting, make sure you have:
 
-### Backend
 - Go 1.25+
-- PostgreSQL
-- Database user with CREATEDB permission
+- Node.js LTS + npm
+- PostgreSQL (with pgvector extension)
+- Python 3.11 (via Anaconda/conda recommended)
+- Conda (Anaconda)
 
-### Frontend
-- Node.js LTS
-- npm
+---
 
+## Step 1 — Install pgvector
 
-## Backend Setup
+pgvector is required for AI semantic search.
 
-### 1. Configure Environment Variables
+```bash
+brew install pgvector
+```
 
-Create:
+Then enable it in PostgreSQL:
 
-backend-service/.env
+```bash
+psql postgres -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
 
-Example:
+---
 
-DATABASE_URL=postgres://username:password@localhost:5432/gatecrown?sslmode=disable
-JWT_SECRET=super-secret-key
+## Step 2 — Configure Backend Environment
+
+Copy and edit the backend environment file:
+
+```bash
+cp backend-service/.env.example backend-service/.env
+```
+
+Open `backend-service/.env` and set your database credentials:
+
+```
+DATABASE_URL=postgresql://localhost:5432/gate_crown
+PORT=8080
+JWT_SECRET=change-me-to-a-long-random-secret
+JWT_EXPIRATION_HOURS=24
 FRONTEND_URL=http://localhost:5173
+AI_SERVICE_URL=http://localhost:8001
+```
 
-Template:
+> Change `DATABASE_URL` to match your PostgreSQL username if needed, e.g. `postgresql://youruser@localhost:5432/gate_crown`
 
-backend-service/.env.example
+---
 
+## Step 3 — Run Database Migrations
 
-### 2. Install Dependencies
+This creates the database and runs all migrations (auth tables, organizations, catalog products with pgvector):
 
-Run from repository root:
-
-go -C backend-service mod tidy
-
-
-### 3. Run Database Migrations
-
+```bash
 go run ./backend-service/cmd/migrate up
+```
 
+---
 
-### 4. Start Backend Server
+## Step 4 — Start the Backend
 
+```bash
 go run ./backend-service/cmd/server
+```
 
-Backend runs at:
+Backend runs at: http://localhost:8080
 
-http://localhost:8080
+---
 
-Important:
+## Step 5 — Set Up the AI Service
 
-Always start backend using:
+The AI service handles vector search, LLM assistant, and RAG using Python.
 
-go run ./backend-service/cmd/server
+### Create conda environment
 
-Do NOT run main.go directly.
+```bash
+conda create -n gatecrown python=3.11 -y
+conda activate gatecrown
+```
 
+### Configure AI service environment
 
-## Frontend Setup
+```bash
+cp AI-service/.env.example AI-service/.env
+```
 
-Start backend first.
+The `.env.example` already contains the Anthropic API key — no changes needed.
 
-Then run:
+### Install dependencies
 
+```bash
+cd AI-service
+/opt/anaconda3/envs/gatecrown/bin/pip install -r requirements.txt
+```
+
+### Start the AI service
+
+```bash
+/opt/anaconda3/envs/gatecrown/bin/python main.py
+```
+
+AI service runs at: http://localhost:8001
+
+---
+
+## Step 6 — Ingest Catalog Embeddings
+
+This generates vector embeddings for all 20 catalog products and stores them in PostgreSQL. Run once:
+
+```bash
+curl -X POST http://localhost:8001/pipeline/ingest \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Expected response:
+
+```json
+{"message": "Ingested 20 products.", "processed": 20}
+```
+
+---
+
+## Step 7 — Start the Frontend
+
+```bash
 cd frontend-client
 npm install
 npm run dev
+```
 
-Frontend runs at:
+Frontend runs at: http://localhost:5173
 
-http://localhost:5173
+---
 
-Development server proxies:
+## Step 8 — Use the Application
 
-/api → http://localhost:8080
+1. Open http://localhost:5173
+2. Click **Register** to create a new account, or use the test account:
+   - Username: `admin`
+   - Password: `admin123`
+3. After login you are taken to the **Milestone 2 Demo Dashboard** which shows:
+   - Data pipeline status (products embedded)
+   - Semantic vector search — type any natural language query
+   - LLM Order Assistant — Claude recommends products based on your description
+   - RAG — Claude answers questions using retrieved catalog context
+4. Visit **/catalog** from the top navigation to browse all products and use AI search
 
-Environment template:
+---
 
-frontend-client/.env.example
+## Test Accounts
 
+| Username | Password | Role |
+|----------|----------|------|
+| admin | admin123 | SUPERADMIN |
+| john.doe | admin123 | ADMIN (Acme Corp) |
+| jane.smith | admin123 | ADMIN (Acme Corp) |
+| sarah.jones | admin123 | ADMIN (Beta Solutions) |
+
+---
+
+## AI Techniques Implemented
+
+| Technique | Description | Endpoint |
+|-----------|-------------|----------|
+| Vector Search | Semantic search using BAAI/bge-small-en-v1.5 embeddings + pgvector cosine similarity | `POST /api/catalog/search` |
+| LLM Assistant | Claude Haiku returns structured JSON order configuration | `POST /api/ai/assist` |
+| RAG | Retrieves top-5 relevant products as context, Claude generates grounded answer | `POST /api/ai/rag` |
+
+---
 
 ## Project Structure
 
-SER594-Team24-GateAndCrownB2B
-│
-├── backend-service
-│   ├── cmd/server
-│   ├── cmd/migrate
-│   ├── internal
-│   └── migrations
-│
-├── frontend-client
-│   ├── src
-│   └── public
-│
+```
+gate-crown/
+├── backend-service/       Go + Gin REST API
+│   ├── cmd/server/        Server entry point
+│   ├── cmd/migrate/       Database migration tool
+│   ├── internal/auth/     Authentication (login, register, JWT)
+│   ├── internal/catalog/  Catalog module (list + search)
+│   ├── internal/aiproxy/  Proxy to Python AI service
+│   └── migrations/        SQL migration files
+├── frontend-client/       Vue 3 + Vite + Tailwind CSS
+│   └── src/views/
+│       ├── LoginView.vue
+│       ├── RegisterView.vue
+│       ├── CatalogView.vue
+│       └── WelcomeView.vue  ← Milestone 2 demo dashboard
+├── AI-service/            Python FastAPI AI service
+│   └── main.py            Vector search, LLM assistant, RAG
 └── go.work
+```
 
+---
 
-## Authentication Flow
+## Quick Start (all steps in order)
 
-User Login
-↓
-JWT Issued (Backend)
-↓
-Stored in Client
-↓
-Attached to API Requests
-↓
-Protected Route Access
+```bash
+# 1. Migrations
+go run ./backend-service/cmd/migrate up
 
-Security features include:
-
-- bcrypt password hashing
-- JWT authentication middleware
-- protected REST endpoints
-
-
-## Development Workflow
-
-Start backend:
-
+# 2. Backend
 go run ./backend-service/cmd/server
 
-Start frontend:
+# 3. AI service (new terminal)
+conda activate gatecrown
+cd AI-service
+/opt/anaconda3/envs/gatecrown/bin/python main.py
 
-npm run dev
+# 4. Ingest embeddings (once)
+curl -X POST http://localhost:8001/pipeline/ingest -H "Content-Type: application/json" -d '{}'
 
-Open application:
+# 5. Frontend (new terminal)
+cd frontend-client
+npm install && npm run dev
+```
 
-http://localhost:5173
-
-
-## Recommended Future Improvements (Optional)
-
-To strengthen this project for internship or portfolio presentation:
-
-- Docker support
-- Swagger/OpenAPI documentation
-- Refresh-token authentication flow
-- Role-based authorization
-- Structured logging
-- Unit tests for handlers and services
-- GitHub Actions CI pipeline
+Open http://localhost:5173 and log in.

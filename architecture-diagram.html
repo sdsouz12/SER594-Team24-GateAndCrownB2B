@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Gate & Crown — Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 48px;
+  }
+  .page-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .badge {
+    display: inline-block;
+    background: #059669;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #64748b; }
+  svg { display: block; max-width: 100%; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    @page { size: A4 landscape; margin: 1cm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="badge">SER 594 · AI for Software Engineers · Milestone 2</div>
+  <h1>Gate &amp; Crown B2B Platform — System Architecture</h1>
+  <div class="sub">Team 24 &nbsp;·&nbsp; Arizona State University &nbsp;·&nbsp; Spring 2026</div>
+</div>
+
+<svg viewBox="0 0 1060 740" width="1060" height="740" xmlns="http://www.w3.org/2000/svg">
+<defs>
+
+  <!-- Arrow markers -->
+  <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+  </marker>
+  <marker id="arr-green-rev" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+    <polygon points="10 0, 0 3.5, 10 7" fill="#059669"/>
+  </marker>
+  <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6"/>
+  </marker>
+  <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/>
+  </marker>
+  <marker id="arr-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/>
+  </marker>
+  <marker id="arr-slate" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+  </marker>
+
+  <!-- Gradients -->
+  <linearGradient id="grad-user" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#e0f2fe;stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:#bae6fd;stop-opacity:1"/>
+  </linearGradient>
+  <linearGradient id="grad-frontend" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#dbeafe;stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:#bfdbfe;stop-opacity:1"/>
+  </linearGradient>
+  <linearGradient id="grad-backend" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:#bbf7d0;stop-opacity:1"/>
+  </linearGradient>
+  <linearGradient id="grad-db" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#f1f5f9;stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1"/>
+  </linearGradient>
+  <linearGradient id="grad-ai" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#ede9fe;stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:#ddd6fe;stop-opacity:1"/>
+  </linearGradient>
+  <linearGradient id="grad-ext" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#fef3c7;stop-opacity:1"/>
+    <stop offset="100%" style="stop-color:#fde68a;stop-opacity:1"/>
+  </linearGradient>
+  <linearGradient id="grad-module" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9"/>
+    <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.5"/>
+  </linearGradient>
+
+  <!-- Drop shadow -->
+  <filter id="shadow" x="-5%" y="-5%" width="115%" height="130%">
+    <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.10"/>
+  </filter>
+  <filter id="shadow-sm" x="-5%" y="-5%" width="115%" height="130%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/>
+  </filter>
+
+</defs>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- LAYER BACKGROUND BANDS                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<!-- User layer -->
+<rect x="0" y="10" width="1060" height="80" rx="0" fill="#f0f9ff" opacity="0.6"/>
+<text x="18" y="55" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#94a3b8" letter-spacing="1.5" text-anchor="start" transform="rotate(-90,18,55)"></text>
+
+<!-- Frontend layer -->
+<rect x="0" y="108" width="1060" height="105" rx="0" fill="#eff6ff" opacity="0.5"/>
+
+<!-- Backend layer -->
+<rect x="0" y="233" width="1060" height="115" rx="0" fill="#f0fdf4" opacity="0.5"/>
+
+<!-- Data & AI layer -->
+<rect x="0" y="368" width="1060" height="185" rx="0" fill="#faf5ff" opacity="0.4"/>
+
+<!-- External layer -->
+<rect x="0" y="573" width="1060" height="155" rx="0" fill="#fffbeb" opacity="0.5"/>
+
+<!-- Layer labels on left -->
+<text x="28" y="57" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#94a3b8" letter-spacing="1" text-anchor="middle" writing-mode="tb" dominant-baseline="middle">USER</text>
+<text x="28" y="163" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#3b82f6" letter-spacing="1" text-anchor="middle" writing-mode="tb" dominant-baseline="middle">FRONTEND</text>
+<text x="28" y="293" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#059669" letter-spacing="1" text-anchor="middle" writing-mode="tb" dominant-baseline="middle">BACKEND</text>
+<text x="28" y="463" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#7c3aed" letter-spacing="1" text-anchor="middle" writing-mode="tb" dominant-baseline="middle">DATA / AI</text>
+<text x="28" y="652" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#d97706" letter-spacing="1" text-anchor="middle" writing-mode="tb" dominant-baseline="middle">EXTERNAL</text>
+
+<!-- Dividers -->
+<line x1="44" y1="10" x2="44" y2="730" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 1. USER BOX                                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<g filter="url(#shadow-sm)">
+  <rect x="390" y="20" width="280" height="62" rx="12" fill="url(#grad-user)" stroke="#7dd3fc" stroke-width="1.5"/>
+</g>
+<!-- Browser icon -->
+<rect x="406" y="33" width="36" height="26" rx="5" fill="#0ea5e9" opacity="0.15" stroke="#0ea5e9" stroke-width="1.5"/>
+<rect x="406" y="33" width="36" height="8" rx="5" fill="#0ea5e9" opacity="0.4"/>
+<circle cx="412" cy="37" r="2" fill="#0ea5e9"/>
+<circle cx="419" cy="37" r="2" fill="#0ea5e9"/>
+<circle cx="426" cy="37" r="2" fill="#0ea5e9"/>
+<text x="453" y="44" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#0c4a6e">Web Browser</text>
+<text x="453" y="58" font-family="Inter,sans-serif" font-size="10.5" fill="#0369a1">User accesses http://localhost:5173</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ARROW: User ↔ Frontend                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<line x1="530" y1="84" x2="530" y2="107" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-blue)"/>
+<line x1="520" y1="107" x2="520" y2="84" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-blue)"/>
+<rect x="537" y="88" width="58" height="14" rx="7" fill="#dbeafe"/>
+<text x="566" y="98.5" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#1d4ed8" text-anchor="middle">HTTPS · HTML</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 2. FRONTEND BOX                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<g filter="url(#shadow)">
+  <rect x="58" y="116" width="944" height="88" rx="14" fill="url(#grad-frontend)" stroke="#93c5fd" stroke-width="1.5"/>
+</g>
+<text x="78" y="137" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e40af">FRONTEND CLIENT</text>
+<text x="78" y="151" font-family="Inter,sans-serif" font-size="10" fill="#3b82f6">Vue 3 + Vite + Tailwind CSS v4  ·  :5173</text>
+
+<!-- Frontend module boxes -->
+<!-- LoginView -->
+<rect x="78" y="159" width="140" height="34" rx="7" fill="url(#grad-module)" stroke="#bfdbfe" stroke-width="1"/>
+<text x="148" y="174" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="#1e40af" text-anchor="middle">LoginView</text>
+<text x="148" y="186" font-family="Inter,sans-serif" font-size="9" fill="#3b82f6" text-anchor="middle">JWT auth form</text>
+
+<!-- RegisterView -->
+<rect x="228" y="159" width="145" height="34" rx="7" fill="url(#grad-module)" stroke="#bfdbfe" stroke-width="1"/>
+<text x="300" y="174" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="#1e40af" text-anchor="middle">RegisterView</text>
+<text x="300" y="186" font-family="Inter,sans-serif" font-size="9" fill="#3b82f6" text-anchor="middle">New user signup</text>
+
+<!-- CatalogView -->
+<rect x="383" y="159" width="155" height="34" rx="7" fill="url(#grad-module)" stroke="#bfdbfe" stroke-width="1"/>
+<text x="460" y="174" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="#1e40af" text-anchor="middle">CatalogView</text>
+<text x="460" y="186" font-family="Inter,sans-serif" font-size="9" fill="#3b82f6" text-anchor="middle">Products + AI Search</text>
+
+<!-- WelcomeView -->
+<rect x="548" y="159" width="200" height="34" rx="7" fill="#1e40af" stroke="#1e40af" stroke-width="1"/>
+<text x="648" y="174" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">WelcomeView</text>
+<text x="648" y="186" font-family="Inter,sans-serif" font-size="9" fill="#bfdbfe" text-anchor="middle">Milestone 2 Demo Dashboard</text>
+
+<!-- AppLayout -->
+<rect x="758" y="159" width="228" height="34" rx="7" fill="url(#grad-module)" stroke="#bfdbfe" stroke-width="1"/>
+<text x="872" y="174" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="#1e40af" text-anchor="middle">AppLayout + Router</text>
+<text x="872" y="186" font-family="Inter,sans-serif" font-size="9" fill="#3b82f6" text-anchor="middle">Vue Router · Auth Guard · Nav</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ARROW: Frontend ↔ Backend                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<line x1="530" y1="206" x2="530" y2="232" stroke="#059669" stroke-width="2" marker-end="url(#arr-green)"/>
+<line x1="520" y1="232" x2="520" y2="206" stroke="#059669" stroke-width="2" marker-end="url(#arr-green)"/>
+<rect x="537" y="212" width="102" height="14" rx="7" fill="#dcfce7"/>
+<text x="588" y="222.5" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#065f46" text-anchor="middle">REST /api/*  ·  JSON</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 3. BACKEND BOX                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<g filter="url(#shadow)">
+  <rect x="58" y="240" width="944" height="100" rx="14" fill="url(#grad-backend)" stroke="#6ee7b7" stroke-width="1.5"/>
+</g>
+<text x="78" y="260" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#064e3b">BACKEND SERVICE</text>
+<text x="78" y="274" font-family="Inter,sans-serif" font-size="10" fill="#059669">Go 1.25 + Gin  ·  JWT Middleware  ·  CORS  ·  :8080</text>
+
+<!-- Auth Module -->
+<rect x="78" y="282" width="230" height="48" rx="8" fill="url(#grad-module)" stroke="#a7f3d0" stroke-width="1"/>
+<text x="193" y="298" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#064e3b" text-anchor="middle">Auth Module</text>
+<text x="193" y="311" font-family="Inter,sans-serif" font-size="9.5" fill="#059669" text-anchor="middle">POST /login  ·  POST /register</text>
+<text x="193" y="323" font-family="Inter,sans-serif" font-size="9.5" fill="#059669" text-anchor="middle">GET /me  ·  PATCH /me  ·  JWT + bcrypt</text>
+
+<!-- Catalog Module -->
+<rect x="320" y="282" width="230" height="48" rx="8" fill="url(#grad-module)" stroke="#a7f3d0" stroke-width="1"/>
+<text x="435" y="298" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#064e3b" text-anchor="middle">Catalog Module</text>
+<text x="435" y="311" font-family="Inter,sans-serif" font-size="9.5" fill="#059669" text-anchor="middle">GET /api/catalog/products</text>
+<text x="435" y="323" font-family="Inter,sans-serif" font-size="9.5" fill="#059669" text-anchor="middle">POST /api/catalog/search</text>
+
+<!-- AI Proxy Module -->
+<rect x="562" y="282" width="420" height="48" rx="8" fill="#064e3b" stroke="#064e3b" stroke-width="1"/>
+<text x="772" y="298" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">AI Proxy Module</text>
+<text x="772" y="311" font-family="Inter,sans-serif" font-size="9.5" fill="#6ee7b7" text-anchor="middle">POST /api/ai/assist  ·  POST /api/ai/rag</text>
+<text x="772" y="323" font-family="Inter,sans-serif" font-size="9.5" fill="#6ee7b7" text-anchor="middle">POST /api/ai/pipeline/ingest  ·  GET /pipeline/status</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ARROWS: Backend → PostgreSQL  &  Backend → AI Service  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<!-- Backend → PostgreSQL (left diagonal) -->
+<path d="M 250 342 C 250 360 220 360 220 377" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arr-slate)"/>
+<path d="M 200 377 C 200 360 170 360 170 342" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arr-slate)"/>
+<rect x="113" y="352" width="66" height="13" rx="6" fill="#e2e8f0"/>
+<text x="146" y="361.5" font-family="Inter,sans-serif" font-size="8.5" font-weight="600" fill="#334155" text-anchor="middle">SQL · pgx/v5</text>
+
+<!-- Backend → AI Service (right side) -->
+<path d="M 810 342 C 810 358 790 358 790 377" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+<path d="M 770 377 C 770 358 750 358 750 342" stroke="#7c3aed" stroke-width="2" fill="none" marker-end="url(#arr-purple)"/>
+<rect x="760" y="352" width="66" height="13" rx="6" fill="#ede9fe"/>
+<text x="793" y="361.5" font-family="Inter,sans-serif" font-size="8.5" font-weight="600" fill="#6d28d9" text-anchor="middle">HTTP proxy</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 4a. POSTGRESQL BOX                                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<g filter="url(#shadow)">
+  <rect x="58" y="385" width="380" height="155" rx="14" fill="url(#grad-db)" stroke="#cbd5e1" stroke-width="1.5"/>
+</g>
+<!-- DB cylinder icon -->
+<ellipse cx="96" cy="408" rx="18" ry="7" fill="#94a3b8" opacity="0.5"/>
+<rect x="78" y="408" width="36" height="22" fill="#94a3b8" opacity="0.3"/>
+<ellipse cx="96" cy="430" rx="18" ry="7" fill="#94a3b8" opacity="0.5"/>
+<ellipse cx="96" cy="415" rx="18" ry="7" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+
+<text x="123" y="408" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#0f172a">PostgreSQL 16</text>
+<text x="123" y="422" font-family="Inter,sans-serif" font-size="10" fill="#475569">+ pgvector extension</text>
+
+<!-- Table pills -->
+<rect x="78" y="438" width="116" height="22" rx="6" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<text x="136" y="453" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#334155" text-anchor="middle">sys_user</text>
+
+<rect x="204" y="438" width="116" height="22" rx="6" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<text x="262" y="453" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#334155" text-anchor="middle">sys_role</text>
+
+<rect x="330" y="438" width="98" height="22" rx="6" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<text x="379" y="453" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#334155" text-anchor="middle">bay_organization</text>
+
+<!-- Catalog product table — highlighted -->
+<rect x="78" y="469" width="350" height="32" rx="8" fill="#0f172a" stroke="#0f172a" stroke-width="1"/>
+<text x="253" y="482" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">catalog_product</text>
+<text x="253" y="494" font-family="Inter,sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">embedding  vector(384)  ·  IVFFlat cosine index</text>
+
+<!-- pgvector badge -->
+<rect x="78" y="511" width="350" height="22" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+<text x="253" y="526" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#065f46" text-anchor="middle">pgvector  ·  cosine similarity search  ·  20 products embedded</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 4b. AI SERVICE BOX                                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<g filter="url(#shadow)">
+  <rect x="468" y="385" width="574" height="155" rx="14" fill="url(#grad-ai)" stroke="#c4b5fd" stroke-width="1.5"/>
+</g>
+<!-- AI icon -->
+<circle cx="506" cy="412" r="16" fill="#7c3aed" opacity="0.15" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="506" y="417" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#6d28d9" text-anchor="middle">AI</text>
+
+<text x="532" y="408" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#3b0764">AI SERVICE</text>
+<text x="532" y="422" font-family="Inter,sans-serif" font-size="10" fill="#7c3aed">Python 3.11 · FastAPI · fastembed ONNX  ·  :8001</text>
+
+<!-- AI Technique 1 -->
+<rect x="480" y="436" width="168" height="56" rx="9" fill="#fff" stroke="#ddd6fe" stroke-width="1.2"/>
+<rect x="480" y="436" width="168" height="18" rx="9" fill="#7c3aed"/>
+<rect x="480" y="446" width="168" height="8" fill="#7c3aed"/>
+<text x="564" y="449" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#fff" text-anchor="middle">Technique 1 — Vector Search</text>
+<text x="564" y="464" font-family="Inter,sans-serif" font-size="9" fill="#4c1d95" text-anchor="middle">POST /search</text>
+<text x="564" y="476" font-family="Inter,sans-serif" font-size="9" fill="#6d28d9" text-anchor="middle">BAAI/bge-small-en-v1.5 (ONNX)</text>
+<text x="564" y="487" font-family="Inter,sans-serif" font-size="9" fill="#7c3aed" text-anchor="middle">pgvector cosine similarity</text>
+
+<!-- AI Technique 2 -->
+<rect x="660" y="436" width="168" height="56" rx="9" fill="#fff" stroke="#ddd6fe" stroke-width="1.2"/>
+<rect x="660" y="436" width="168" height="18" rx="9" fill="#6d28d9"/>
+<rect x="660" y="446" width="168" height="8" fill="#6d28d9"/>
+<text x="744" y="449" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#fff" text-anchor="middle">Technique 2 — LLM Assistant</text>
+<text x="744" y="464" font-family="Inter,sans-serif" font-size="9" fill="#4c1d95" text-anchor="middle">POST /assist</text>
+<text x="744" y="476" font-family="Inter,sans-serif" font-size="9" fill="#6d28d9" text-anchor="middle">Structured JSON prompting</text>
+<text x="744" y="487" font-family="Inter,sans-serif" font-size="9" fill="#7c3aed" text-anchor="middle">Claude Haiku → order config</text>
+
+<!-- AI Technique 3 -->
+<rect x="840" y="436" width="188" height="56" rx="9" fill="#fff" stroke="#ddd6fe" stroke-width="1.2"/>
+<rect x="840" y="436" width="188" height="18" rx="9" fill="#4c1d95"/>
+<rect x="840" y="446" width="188" height="8" fill="#4c1d95"/>
+<text x="934" y="449" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#fff" text-anchor="middle">Technique 3 — RAG</text>
+<text x="934" y="464" font-family="Inter,sans-serif" font-size="9" fill="#4c1d95" text-anchor="middle">POST /rag</text>
+<text x="934" y="476" font-family="Inter,sans-serif" font-size="9" fill="#6d28d9" text-anchor="middle">Retrieve top-5 products</text>
+<text x="934" y="487" font-family="Inter,sans-serif" font-size="9" fill="#7c3aed" text-anchor="middle">Inject context → Claude answer</text>
+
+<!-- Pipeline -->
+<rect x="480" y="502" width="548" height="26" rx="7" fill="#4c1d95" stroke="#4c1d95"/>
+<text x="754" y="519" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#fff" text-anchor="middle">Data Pipeline  ·  POST /pipeline/ingest  ·  Generate &amp; store embeddings for all catalog products</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ARROW: AI Service ↔ PostgreSQL (horizontal)           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<line x1="438" y1="468" x2="470" y2="468" stroke="#475569" stroke-width="2" marker-end="url(#arr-slate)"/>
+<line x1="470" y1="480" x2="438" y2="480" stroke="#475569" stroke-width="2" marker-end="url(#arr-slate)"/>
+<rect x="428" y="463" width="52" height="13" rx="6" fill="#e2e8f0"/>
+<text x="454" y="472.5" font-family="Inter,sans-serif" font-size="8.5" font-weight="600" fill="#334155" text-anchor="middle">read/write</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ARROW: AI Service → Anthropic                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<line x1="744" y1="542" x2="744" y2="572" stroke="#d97706" stroke-width="2" marker-end="url(#arr-amber)"/>
+<line x1="756" y1="572" x2="756" y2="542" stroke="#d97706" stroke-width="2" marker-end="url(#arr-amber)"/>
+<rect x="762" y="549" width="88" height="13" rx="6" fill="#fef3c7"/>
+<text x="806" y="558.5" font-family="Inter,sans-serif" font-size="8.5" font-weight="600" fill="#92400e" text-anchor="middle">HTTPS · API Key</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- 5. ANTHROPIC CLAUDE BOX                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<g filter="url(#shadow)">
+  <rect x="468" y="580" width="574" height="120" rx="14" fill="url(#grad-ext)" stroke="#fbbf24" stroke-width="1.5"/>
+</g>
+<!-- Anthropic logo placeholder -->
+<circle cx="508" cy="618" r="20" fill="#d97706" opacity="0.2" stroke="#d97706" stroke-width="1.5"/>
+<text x="508" y="624" font-family="Inter,sans-serif" font-size="16" font-weight="800" fill="#92400e" text-anchor="middle">A</text>
+
+<text x="540" y="606" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#451a03">ANTHROPIC CLAUDE API</text>
+<text x="540" y="620" font-family="Inter,sans-serif" font-size="10" fill="#92400e">External LLM service  ·  claude-haiku-4-5-20251001</text>
+
+<!-- Usage pills -->
+<rect x="480" y="632" width="175" height="22" rx="7" fill="#fff" stroke="#fde68a" stroke-width="1"/>
+<text x="567" y="647" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#92400e" text-anchor="middle">Order config (structured JSON)</text>
+
+<rect x="665" y="632" width="165" height="22" rx="7" fill="#fff" stroke="#fde68a" stroke-width="1"/>
+<text x="747" y="647" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#92400e" text-anchor="middle">RAG answer generation</text>
+
+<rect x="840" y="632" width="188" height="22" rx="7" fill="#92400e"/>
+<text x="934" y="647" font-family="Inter,sans-serif" font-size="9.5" font-weight="600" fill="#fff" text-anchor="middle">max_tokens: 512  ·  JSON mode</text>
+
+<!-- Model label -->
+<rect x="480" y="662" width="548" height="26" rx="7" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+<text x="754" y="679" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#78350f" text-anchor="middle">API Key stored in AI-service/.env  ·  Calls made by /assist and /rag endpoints only  ·  No data persisted externally</text>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- LEGEND                                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<rect x="58" y="706" width="944" height="28" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+
+<circle cx="80" cy="720" r="5" fill="#7dd3fc"/>
+<text x="90" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">Frontend (Vue 3)</text>
+
+<circle cx="195" cy="720" r="5" fill="#6ee7b7"/>
+<text x="205" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">Backend (Go/Gin)</text>
+
+<circle cx="315" cy="720" r="5" fill="#c4b5fd"/>
+<text x="325" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">AI Service (FastAPI)</text>
+
+<circle cx="445" cy="720" r="5" fill="#cbd5e1"/>
+<text x="455" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">PostgreSQL + pgvector</text>
+
+<circle cx="590" cy="720" r="5" fill="#fbbf24"/>
+<text x="600" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">External API (Anthropic)</text>
+
+<line x1="720" y1="715" x2="740" y2="715" stroke="#059669" stroke-width="2" marker-end="url(#arr-green)"/>
+<text x="745" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">REST / HTTP</text>
+
+<line x1="820" y1="715" x2="840" y2="715" stroke="#475569" stroke-width="2" stroke-dasharray="4,2"/>
+<text x="845" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">SQL</text>
+
+<line x1="885" y1="715" x2="905" y2="715" stroke="#d97706" stroke-width="2" marker-end="url(#arr-amber)"/>
+<text x="910" y="724" font-family="Inter,sans-serif" font-size="9.5" fill="#334155">HTTPS</text>
+
+</svg>
+
+
+</body>
+</html>

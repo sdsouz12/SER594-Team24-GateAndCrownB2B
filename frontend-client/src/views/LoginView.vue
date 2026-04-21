@@ -56,6 +56,9 @@ async function onSubmit(e) {
           <div class="login-logo" aria-hidden="true">G</div>
           <h1 class="login-title">Sign in</h1>
           <p class="login-subtitle">Use your account to continue.</p>
+          <p class="login-register-link">
+            New here? <RouterLink :to="{ name: 'Register' }" class="register-link">Create an account</RouterLink>
+          </p>
         </div>
 
         <form class="login-form" @submit="onSubmit">
@@ -213,7 +216,23 @@ async function onSubmit(e) {
 .login-subtitle {
   font-size: 0.9375rem;
   color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 0.5rem;
+}
+
+.login-register-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
   margin: 0;
+}
+
+.register-link {
+  color: #6ee7b7;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link:hover {
+  color: #10b981;
 }
 
 .login-form {

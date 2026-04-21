@@ -13,4 +13,6 @@ var (
 	ErrNothingToUpdate = errors.New("no fields to update")
 	// ErrDuplicateEmail is returned when email is already used by another user.
 	ErrDuplicateEmail = errors.New("email is already taken")
+	// ErrUsernameTaken is returned when registering with an already-used username.
+	ErrUsernameTaken = errors.New("username is already taken")
 )

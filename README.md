@@ -98,6 +98,7 @@ Init conda for your shell:
 ```bash
 conda init zsh
 ```
+Ensure that you restart your terminal after this step
 
 ```bash
 conda create -n gatecrown python=3.11 -y

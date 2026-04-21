@@ -1,4 +1,3 @@
-package projects
 package auth
 
 import (

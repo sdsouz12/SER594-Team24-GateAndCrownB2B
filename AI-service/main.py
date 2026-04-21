@@ -236,6 +236,60 @@ Always respond with valid JSON in this exact structure:
     return {"data": parsed, "model": "claude-haiku-4-5-20251001"}
 
 
+# ── AI Technique 3: RAG ───────────────────────────────────────────────────────
+
+@app.post("/rag")
+def rag_query(req: RagRequest):
+    """
+    Retrieval-Augmented Generation: retrieves relevant catalog products,
+    injects them as context, then asks Claude to answer the user's question.
+    """
+    # Retrieve top-5 relevant products
+    query_vec = embed(req.question)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT name, category, description, price_range, material, dimensions
+        FROM catalog_product
+        WHERE status = 'active' AND embedding IS NOT NULL
+        ORDER BY embedding <=> %s::vector
+        LIMIT 5
+        """,
+        [query_vec],
+    )
+    rows = cur.fetchall()
+    cur.close()
+
+    if not rows:
+        raise HTTPException(status_code=503, detail="No catalog data available. Run /pipeline/ingest first.")
+
+    # Build context from retrieved products
+    context_lines = []
+    for name, category, description, price_range, material, dimensions in rows:
+        context_lines.append(
+            f"- {name} ({category}): {description or 'N/A'} | Price: {price_range or 'N/A'} | Material: {material or 'N/A'} | Size: {dimensions or 'N/A'}"
+        )
+    context = "\n".join(context_lines)
+
+    client = get_anthropic()
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=512,
+        system="You are a helpful assistant for Gate & Crown B2B platform. Answer questions using only the provided catalog context. Be concise and accurate.",
+        messages=[
+            {
+                "role": "user",
+                "content": f"Catalog context:\n{context}\n\nQuestion: {req.question}",
+            }
+        ],
+    )
+
+    return {
+        "answer": message.content[0].text.strip(),
+        "sources": [r[0] for r in rows],
+        "model": "claude-haiku-4-5-20251001",
+    }
 
 
 if __name__ == "__main__":

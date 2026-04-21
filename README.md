@@ -27,6 +27,7 @@ brew install pgvector
 ```
 
 Then enable it in PostgreSQL:
+Ensure that the Postgres version that you have is 17 or above
 
 ```bash
 psql postgres -c "CREATE EXTENSION IF NOT EXISTS vector;"
@@ -43,6 +44,9 @@ cp backend-service/.env.example backend-service/.env
 ```
 
 Open `backend-service/.env` and set your database credentials:
+```bash
+open backend-service/.env
+```
 
 ```
 DATABASE_URL=postgresql://localhost:5432/gate_crown
@@ -54,6 +58,10 @@ AI_SERVICE_URL=http://localhost:8001
 ```
 
 > Change `DATABASE_URL` to match your PostgreSQL username if needed, e.g. `postgresql://youruser@localhost:5432/gate_crown`
+> to find this run
+```bash
+psql postgres -c "\du"
+```
 
 ---
 
@@ -82,6 +90,17 @@ Backend runs at: http://localhost:8080
 The AI service handles vector search, LLM assistant, and RAG using Python.
 
 ### Create conda environment
+
+Make sure you have anaconda installed:
+
+After this make sure you accept the terms and conditions by running the commands that show up on your terminal 
+
+Init conda for your shell:
+
+```bash
+conda init zsh
+```
+Ensure that you restart your terminal after this step
 
 ```bash
 conda create -n gatecrown python=3.11 -y
@@ -113,7 +132,7 @@ AI service runs at: http://localhost:8001
 
 ---
 
-## Step 6 — Ingest Catalog Embeddings
+## Step 6 — Ingest Catalog Embeddings (In a new terminal)
 
 This generates vector embeddings for all 20 catalog products and stores them in PostgreSQL. Run once:
 

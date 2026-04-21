@@ -88,9 +88,6 @@ The AI service handles vector search, LLM assistant, and RAG using Python.
 
 Make sure you have anaconda installed:
 
-```bash
-brew install --cask miniconda
-```
 After this make sure you accept the terms and conditions by running the commands that show up on your terminal 
 
 Init conda for your shell:

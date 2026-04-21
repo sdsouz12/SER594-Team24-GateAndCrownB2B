@@ -91,6 +91,14 @@ Make sure you have anaconda installed:
 ```bash
 brew install --cask miniconda
 ```
+After this make sure you accept the terms and conditions by running the commands that show up on your terminal 
+
+Init conda for your shell:
+
+```bash
+conda init zsh
+```
+
 ```bash
 conda create -n gatecrown python=3.11 -y
 conda activate gatecrown

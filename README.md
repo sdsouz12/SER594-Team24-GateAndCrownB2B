@@ -58,6 +58,10 @@ AI_SERVICE_URL=http://localhost:8001
 ```
 
 > Change `DATABASE_URL` to match your PostgreSQL username if needed, e.g. `postgresql://youruser@localhost:5432/gate_crown`
+> to find this run
+```bash
+psql postgres -c "\du"
+```
 
 ---
 

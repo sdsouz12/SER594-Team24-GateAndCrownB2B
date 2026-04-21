@@ -127,7 +127,7 @@ AI service runs at: http://localhost:8001
 
 ---
 
-## Step 6 — Ingest Catalog Embeddings
+## Step 6 — Ingest Catalog Embeddings (In a new terminal)
 
 This generates vector embeddings for all 20 catalog products and stores them in PostgreSQL. Run once:
 

@@ -16,6 +16,9 @@ const { isLoggedIn, user, logout } = useAuth()
         <RouterLink to="/catalog" class="text-sm font-medium text-gray-600 hover:text-gray-900">
           Catalog
         </RouterLink>
+        <RouterLink v-if="isLoggedIn" to="/orders" class="text-sm font-medium text-gray-600 hover:text-gray-900">
+          My Orders
+        </RouterLink>
       </div>
       <div class="flex items-center gap-3">
         <template v-if="isLoggedIn">

@@ -1,30 +1,41 @@
 # Gate & Crown B2B Platform
 
-SER 594 — AI for Software Engineers | Final Milestone
+**SER 594 — AI for Software Engineers | Team 24 | Final Milestone**
 
 Full-stack B2B ordering platform with semantic search, LLM order assistant, and RAG — built with Go, Vue 3, and Python (FastAPI).
 
----
-
-## Deployed / Running Locally
-
-This project ships with a complete Docker Compose setup. See **Docker Setup** below for the one-command run.
+**CI Status:** [![CI](https://github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/actions/workflows/ci.yml/badge.svg)](https://github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/actions/workflows/ci.yml)
+**CI Dashboard:** https://github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/actions
 
 ---
 
-## Requirements
+## What's Implemented (Feature Complete)
 
-- Go 1.25+
-- Node.js LTS + npm
-- PostgreSQL 16+ with pgvector extension
-- Python 3.11 (via Anaconda/conda recommended)
-- Docker + Docker Compose (for containerised run)
+| Feature | Status |
+|---|---|
+| JWT authentication — login, registration, role-based sessions | ✅ Done |
+| AI Technique 1 — Vector Search (BAAI/bge-small-en-v1.5 + pgvector) | ✅ Done |
+| AI Technique 2 — LLM Order Assistant (Claude Haiku, structured JSON) | ✅ Done |
+| AI Technique 3 — RAG (catalog context retrieval + Claude grounded Q&A) | ✅ Done |
+| Order management — place orders from catalog, track status | ✅ Done |
+| Test suite — 30 automated unit tests (Go + Python) | ✅ Done |
+| Docker deployment — all services run with one command | ✅ Done |
+| GitHub Actions CI — tests run on every push automatically | ✅ Done |
 
 ---
 
-## Option A — Docker (Recommended)
+## CI — Already Running
 
-No manual setup required — Docker handles the database, migrations, backend, AI service, and frontend.
+GitHub Actions is configured at `.github/workflows/ci.yml` and runs automatically on every push to `main`. **No manual configuration needed.**
+
+View live CI results:
+**https://github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/actions**
+
+---
+
+## Option A — Docker (Recommended, Easiest)
+
+No manual setup required — Docker handles the database, migrations, backend, AI service, and frontend automatically.
 
 ```bash
 docker compose up --build
@@ -32,18 +43,17 @@ docker compose up --build
 
 Then open **http://localhost:3000** and log in.
 
-> First run downloads the embedding model (~66 MB) inside the AI-service container — allow ~2 minutes.
+> First run downloads the embedding model (~66 MB inside the container) — allow ~2–3 minutes.
 
 To stop:
-
 ```bash
 docker compose down
 ```
 
-To wipe data and start fresh:
-
+To wipe data and start completely fresh:
 ```bash
 docker compose down -v
+docker compose up --build
 ```
 
 ---
@@ -101,7 +111,7 @@ The `.env.example` already contains the Anthropic API key — no changes needed:
 cp AI-service/.env.example AI-service/.env
 ```
 
-Install dependencies and start:
+Install and start:
 
 ```bash
 cd AI-service
@@ -136,12 +146,12 @@ Frontend runs at: http://localhost:5173
 
 1. Open the app (http://localhost:5173 or http://localhost:3000 for Docker)
 2. **Register** a new account or use a test account below
-3. After login you land on the **Demo Dashboard** which shows:
-   - Data pipeline status
-   - Semantic vector search
-   - LLM Order Assistant (Claude)
-   - RAG Q&A
-4. Navigate to **/catalog** to browse products and use AI-powered search
+3. After login you land on the **Final Milestone Dashboard** showing all features
+4. Go to **Catalog** to browse 20 products and use AI-powered search
+5. Click **Place Order** on any product to submit an order
+6. Go to **My Orders** to see your order history and status
+7. Use the **Order Assistant** (Claude) on the catalog page for AI recommendations
+8. Use the **RAG** section on the dashboard to ask questions about catalog pricing and materials
 
 ---
 
@@ -158,14 +168,18 @@ Frontend runs at: http://localhost:5173
 
 ## Running the Test Suite
 
-### Backend (Go) — 15 unit tests
+All 30 tests run **without a database or network connection** — all external I/O is mocked.
+
+### Backend — 15 Go unit tests
 
 ```bash
 cd backend-service
 go test ./... -v
 ```
 
-### AI Service (Python) — 15 unit tests
+Covers: JWT validation (valid/expired/wrong secret/malformed), login (valid credentials/wrong password/deactivated/no role), register (success/username taken), profile update (no fields/short password/missing current/wrong current password).
+
+### AI Service — 15 Python unit tests
 
 ```bash
 cd AI-service
@@ -173,19 +187,22 @@ pip install -r requirements-test.txt
 pytest tests/ -v
 ```
 
-All 30 tests run without a database or network connection (external I/O is mocked).
+Covers: health endpoint, vector search (empty/results/category filter), pipeline status/ingest, LLM assistant (structured JSON/category hint/plain text fallback), RAG (503 when no catalog/success with sources).
 
-CI runs both suites automatically on every push via GitHub Actions (`.github/workflows/ci.yml`).
+### CI (automatic)
+
+Both suites run automatically on every push to `main` via GitHub Actions.
+Results: **https://github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/actions**
 
 ---
 
 ## AI Techniques Implemented
 
-| Technique | Description | Endpoint |
+| Technique | How it works | Endpoint |
 |---|---|---|
-| Vector Search | BAAI/bge-small-en-v1.5 embeddings + pgvector cosine similarity | `POST /api/catalog/search` |
-| LLM Assistant | Claude Haiku returns structured JSON order recommendations | `POST /api/ai/assist` |
-| RAG | Top-5 relevant products retrieved as context; Claude answers grounded Q&A | `POST /api/ai/rag` |
+| Vector Search | User query embedded with BAAI/bge-small-en-v1.5 (ONNX/fastembed), compared against stored product embeddings in PostgreSQL using pgvector cosine similarity | `POST /api/catalog/search` |
+| LLM Assistant | User describes a requirement; Claude Haiku returns structured JSON with product category, price range, key features, and next steps | `POST /api/ai/assist` |
+| RAG | Top-5 most relevant products retrieved from pgvector and injected as context; Claude generates a grounded natural-language answer | `POST /api/ai/rag` |
 
 ---
 
@@ -196,34 +213,36 @@ gate-crown/
 ├── backend-service/          Go + Gin REST API
 │   ├── cmd/server/           Server entry point
 │   ├── cmd/migrate/          Database migration tool
-│   ├── internal/auth/        Auth (login, register, JWT) + unit tests
+│   ├── internal/auth/        Auth (login, register, JWT) + 15 unit tests
 │   ├── internal/catalog/     Catalog (list + semantic search)
+│   ├── internal/orders/      Order management (create, list)
 │   ├── internal/aiproxy/     Proxy to Python AI service
-│   ├── migrations/           SQL migration files (001–006)
+│   ├── migrations/           SQL migration files (001–007)
 │   ├── Dockerfile
 │   └── entrypoint.sh
 ├── frontend-client/          Vue 3 + Vite + Tailwind CSS
 │   ├── src/views/
-│   │   ├── WelcomeView.vue   Demo dashboard
-│   │   ├── CatalogView.vue   Product catalog + AI search
+│   │   ├── WelcomeView.vue   Final milestone dashboard
+│   │   ├── CatalogView.vue   Product catalog + AI search + order modal
+│   │   ├── OrdersView.vue    Order history and status
 │   │   ├── LoginView.vue
 │   │   └── RegisterView.vue
 │   ├── Dockerfile
 │   └── nginx.conf
 ├── AI-service/               Python FastAPI AI microservice
 │   ├── main.py               Vector search, LLM assistant, RAG
-│   ├── tests/test_main.py    15 unit tests
+│   ├── tests/test_main.py    15 Python unit tests
 │   ├── requirements.txt
 │   ├── requirements-test.txt
 │   └── Dockerfile
-├── docker-compose.yml
+├── docker-compose.yml        One-command deployment
 ├── .github/workflows/ci.yml  GitHub Actions CI
 └── go.work
 ```
 
 ---
 
-## Quick Start (manual, all commands in order)
+## Quick Start (manual)
 
 ```bash
 # 1. Migrations
@@ -233,7 +252,6 @@ go run ./backend-service/cmd/migrate up
 go run ./backend-service/cmd/server
 
 # 3. AI service (terminal 2)
-conda activate gatecrown
 /opt/anaconda3/envs/gatecrown/bin/python AI-service/main.py
 
 # 4. Ingest embeddings (once)

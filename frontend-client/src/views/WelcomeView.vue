@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useAuth } from '../composables/useAuth'
 import { searchProducts, askAssistant } from '../api/catalog'
+import { apiFetch } from '../api/client'
 
 const { user } = useAuth()
 
@@ -12,10 +13,10 @@ const pipelineLoading = ref(false)
 async function loadPipeline() {
   pipelineLoading.value = true
   try {
-    const res = await fetch('http://localhost:8001/pipeline/status')
+    const res = await apiFetch('/api/ai/pipeline/status')
     pipeline.value = await res.json()
   } catch {
-    pipeline.value = { error: 'AI service not running' }
+    pipeline.value = { error: 'AI service not reachable' }
   } finally {
     pipelineLoading.value = false
   }
@@ -24,9 +25,8 @@ async function loadPipeline() {
 async function runIngest() {
   pipelineLoading.value = true
   try {
-    await fetch('http://localhost:8001/pipeline/ingest', {
+    await apiFetch('/api/ai/pipeline/ingest', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: '{}',
     })
     await loadPipeline()
@@ -90,9 +90,8 @@ async function runRag() {
   ragError.value = ''
   ragDone.value = false
   try {
-    const res = await fetch('http://localhost:8001/rag', {
+    const res = await apiFetch('/api/ai/rag', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: ragQuery.value }),
     })
     ragResult.value = await res.json()
@@ -112,69 +111,83 @@ onMounted(loadPipeline)
 
     <!-- Header -->
     <div class="demo-header">
-      <div class="demo-badge">SER 594 — Milestone 2 Demo</div>
+      <div class="demo-badge">SER 594 — Final Milestone</div>
       <h1 class="demo-title">Gate & Crown B2B Platform</h1>
       <p class="demo-subtitle">
         Logged in as <strong>{{ user?.username }}</strong> ({{ user?.role }})
       </p>
     </div>
 
-    <!-- Requirements checklist -->
+    <!-- Final milestone checklist -->
     <div class="checklist-card">
-      <h2 class="section-title">Milestone 2 Requirements</h2>
+      <h2 class="section-title">Final Milestone — Feature Complete</h2>
       <ul class="checklist">
-        <li class="check-item done">
+        <li class="check-item">
           <span class="check-icon">✅</span>
           <div>
-            <strong>Authentication functional</strong>
-            <span class="check-note">Login + Registration working — JWT, bcrypt, role-based</span>
+            <strong>Authentication &amp; Registration</strong>
+            <span class="check-note">JWT login, bcrypt register, role-based sessions (CLIENT / ADMIN / SUPERADMIN)</span>
           </div>
         </li>
-        <li class="check-item done">
-          <span class="check-icon">✅</span>
-          <div>
-            <strong>Frontend scaffold in place</strong>
-            <span class="check-note">Vue 3 + Tailwind — Login, Register, Catalog, Home, Dashboard views</span>
-          </div>
-        </li>
-        <li class="check-item done">
-          <span class="check-icon">✅</span>
-          <div>
-            <strong>Data pipeline operational</strong>
-            <span class="check-note">20 catalog products → sentence embeddings → PostgreSQL pgvector</span>
-          </div>
-        </li>
-        <li class="check-item done">
+        <li class="check-item">
           <span class="check-icon">✅</span>
           <div>
             <strong>AI Technique 1 — Vector Search</strong>
-            <span class="check-note">Semantic search via fastembed (ONNX) + pgvector cosine similarity</span>
+            <span class="check-note">BAAI/bge-small-en-v1.5 (ONNX) embeddings + pgvector cosine similarity</span>
           </div>
         </li>
-        <li class="check-item done">
+        <li class="check-item">
           <span class="check-icon">✅</span>
           <div>
-            <strong>AI Technique 2 — LLM Assistant</strong>
-            <span class="check-note">Claude Haiku structured JSON order configuration recommendations</span>
+            <strong>AI Technique 2 — LLM Order Assistant</strong>
+            <span class="check-note">Claude Haiku returns structured JSON product recommendations</span>
           </div>
         </li>
-        <li class="check-item done">
+        <li class="check-item">
           <span class="check-icon">✅</span>
           <div>
             <strong>AI Technique 3 — RAG</strong>
-            <span class="check-note">Retrieves relevant catalog context → Claude generates grounded answers</span>
+            <span class="check-note">Top-5 catalog products retrieved as context → Claude generates grounded answers</span>
+          </div>
+        </li>
+        <li class="check-item">
+          <span class="check-icon">✅</span>
+          <div>
+            <strong>Order Management</strong>
+            <span class="check-note">Users place orders from catalog; order list with status tracking</span>
+          </div>
+        </li>
+        <li class="check-item">
+          <span class="check-icon">✅</span>
+          <div>
+            <strong>Test Suite — 30 tests</strong>
+            <span class="check-note">15 Go unit tests (auth service) + 15 Python unit tests (AI service); all mocked, no DB required</span>
+          </div>
+        </li>
+        <li class="check-item">
+          <span class="check-icon">✅</span>
+          <div>
+            <strong>Docker Deployment</strong>
+            <span class="check-note">docker-compose up --build runs all 4 services (postgres/pgvector, backend, AI service, frontend)</span>
+          </div>
+        </li>
+        <li class="check-item">
+          <span class="check-icon">✅</span>
+          <div>
+            <strong>CI Pipeline</strong>
+            <span class="check-note">GitHub Actions runs both test suites on every push to main</span>
           </div>
         </li>
       </ul>
     </div>
 
-    <!-- ── Section 1: Data Pipeline ─────────────────────────────────────────── -->
+    <!-- ── Section 1: Data Pipeline ───────────────────────────────────────────── -->
     <div class="demo-section">
       <div class="section-header">
         <div class="section-num">1</div>
         <div>
           <h2 class="section-title">Data Pipeline</h2>
-          <p class="section-desc">Catalog products ingested into PostgreSQL with pgvector embeddings.</p>
+          <p class="section-desc">20 catalog products ingested into PostgreSQL with pgvector embeddings.</p>
         </div>
       </div>
 
@@ -209,16 +222,15 @@ onMounted(loadPipeline)
       <div v-else class="loading-text">Loading pipeline status…</div>
     </div>
 
-    <!-- ── Section 2: Vector Search ─────────────────────────────────────────── -->
+    <!-- ── Section 2: Vector Search ───────────────────────────────────────────── -->
     <div class="demo-section">
       <div class="section-header">
         <div class="section-num ai">2</div>
         <div>
           <h2 class="section-title">AI Technique 1 — Semantic Vector Search</h2>
-          <p class="section-desc">Query is embedded with BAAI/bge-small-en-v1.5 (ONNX), matched against catalog via pgvector cosine similarity.</p>
+          <p class="section-desc">Query embedded with BAAI/bge-small-en-v1.5 (ONNX), matched via pgvector cosine similarity.</p>
         </div>
       </div>
-
       <div class="input-row">
         <input v-model="searchQuery" class="demo-input" placeholder="e.g. heavy gate for warehouse entrance" @keyup.enter="runSearch" />
         <button class="btn-ai" :disabled="searchLoading" @click="runSearch">
@@ -226,7 +238,6 @@ onMounted(loadPipeline)
         </button>
       </div>
       <p v-if="searchError" class="error-text">{{ searchError }}</p>
-
       <div v-if="searchDone && searchResults.length" class="results-list">
         <div v-for="r in searchResults.slice(0, 5)" :key="r.product?.productId" class="result-item">
           <div class="result-top">
@@ -237,10 +248,10 @@ onMounted(loadPipeline)
           <span class="cat-chip">{{ r.product?.category }}</span>
         </div>
       </div>
-      <div v-else-if="searchDone" class="empty-note">No results. Make sure pipeline ingest ran first.</div>
+      <div v-else-if="searchDone" class="empty-note">No results — run pipeline ingest first.</div>
     </div>
 
-    <!-- ── Section 3: LLM Assistant ─────────────────────────────────────────── -->
+    <!-- ── Section 3: LLM Assistant ───────────────────────────────────────────── -->
     <div class="demo-section">
       <div class="section-header">
         <div class="section-num ai">3</div>
@@ -249,7 +260,6 @@ onMounted(loadPipeline)
           <p class="section-desc">Structured prompting with Claude Haiku returns JSON order recommendations.</p>
         </div>
       </div>
-
       <div class="input-row">
         <input v-model="assistQuery" class="demo-input" placeholder="Describe your gate requirement…" @keyup.enter="runAssist" />
         <button class="btn-ai" :disabled="assistLoading" @click="runAssist">
@@ -257,7 +267,6 @@ onMounted(loadPipeline)
         </button>
       </div>
       <p v-if="assistError" class="error-text">{{ assistError }}</p>
-
       <div v-if="assistDone && assistResult" class="assist-card">
         <p class="assist-rec">{{ assistResult.recommendation }}</p>
         <div class="assist-meta">
@@ -266,30 +275,25 @@ onMounted(loadPipeline)
         </div>
         <div v-if="assistResult.key_features?.length" class="feature-block">
           <p class="feature-label">Key features</p>
-          <ul class="feature-list">
-            <li v-for="f in assistResult.key_features" :key="f">{{ f }}</li>
-          </ul>
+          <ul class="feature-list"><li v-for="f in assistResult.key_features" :key="f">{{ f }}</li></ul>
         </div>
         <div v-if="assistResult.next_steps?.length" class="feature-block">
           <p class="feature-label">Next steps</p>
-          <ul class="feature-list">
-            <li v-for="s in assistResult.next_steps" :key="s">{{ s }}</li>
-          </ul>
+          <ul class="feature-list"><li v-for="s in assistResult.next_steps" :key="s">{{ s }}</li></ul>
         </div>
         <div class="model-badge">claude-haiku-4-5-20251001</div>
       </div>
     </div>
 
-    <!-- ── Section 4: RAG ────────────────────────────────────────────────────── -->
+    <!-- ── Section 4: RAG ─────────────────────────────────────────────────────── -->
     <div class="demo-section">
       <div class="section-header">
         <div class="section-num ai">4</div>
         <div>
           <h2 class="section-title">AI Technique 3 — Retrieval-Augmented Generation (RAG)</h2>
-          <p class="section-desc">Retrieves top-5 relevant catalog products as context, then Claude generates a grounded answer.</p>
+          <p class="section-desc">Top-5 relevant catalog products retrieved as context → Claude generates grounded answer.</p>
         </div>
       </div>
-
       <div class="input-row">
         <input v-model="ragQuery" class="demo-input" placeholder="Ask about catalog or pricing…" @keyup.enter="runRag" />
         <button class="btn-ai" :disabled="ragLoading" @click="runRag">
@@ -297,14 +301,53 @@ onMounted(loadPipeline)
         </button>
       </div>
       <p v-if="ragError" class="error-text">{{ ragError }}</p>
-
       <div v-if="ragDone && ragResult" class="rag-card">
         <p class="rag-answer">{{ ragResult.answer }}</p>
         <div class="rag-sources">
-          <span class="source-label">Sources retrieved:</span>
+          <span class="source-label">Sources:</span>
           <span v-for="s in ragResult.sources" :key="s" class="source-chip">{{ s }}</span>
         </div>
         <div class="model-badge">claude-haiku-4-5-20251001</div>
+      </div>
+    </div>
+
+    <!-- ── Section 5: Orders ──────────────────────────────────────────────────── -->
+    <div class="demo-section">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <div>
+          <h2 class="section-title">Order Management</h2>
+          <p class="section-desc">Browse the catalog, place orders, and track their status in My Orders.</p>
+        </div>
+      </div>
+      <div class="action-links">
+        <RouterLink to="/catalog" class="action-link primary">Go to Catalog →</RouterLink>
+        <RouterLink to="/orders" class="action-link">My Orders →</RouterLink>
+      </div>
+    </div>
+
+    <!-- ── Section 6: Tests & CI ──────────────────────────────────────────────── -->
+    <div class="demo-section">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <div>
+          <h2 class="section-title">Tests &amp; CI</h2>
+          <p class="section-desc">30 automated tests run on every push via GitHub Actions.</p>
+        </div>
+      </div>
+      <div class="test-grid">
+        <div class="test-box">
+          <div class="test-count">15</div>
+          <div class="test-label">Go unit tests</div>
+          <div class="test-sub">JWT, login, register, updateMe</div>
+          <code class="test-cmd">go test ./... -v</code>
+        </div>
+        <div class="test-box">
+          <div class="test-count">15</div>
+          <div class="test-label">Python unit tests</div>
+          <div class="test-sub">search, assist, RAG, pipeline</div>
+          <code class="test-cmd">pytest tests/ -v</code>
+        </div>
       </div>
     </div>
 
@@ -378,4 +421,17 @@ onMounted(loadPipeline)
 .rag-sources { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
 .source-label { font-size: 0.75rem; color: #6b7280; font-weight: 600; }
 .source-chip { font-size: 0.75rem; background: #dbeafe; color: #1d4ed8; padding: 0.15rem 0.5rem; border-radius: 9999px; }
+
+.action-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.action-link { padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; text-decoration: none; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; transition: background 0.15s; }
+.action-link:hover { background: #e5e7eb; }
+.action-link.primary { background: #059669; color: #fff; border-color: #059669; }
+.action-link.primary:hover { background: #047857; }
+
+.test-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.test-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; }
+.test-count { font-size: 2rem; font-weight: 800; color: #059669; line-height: 1; }
+.test-label { font-size: 0.9375rem; font-weight: 600; color: #111827; margin: 0.25rem 0 0.2rem; }
+.test-sub { font-size: 0.8125rem; color: #6b7280; margin-bottom: 0.75rem; }
+.test-cmd { display: block; background: #1f2937; color: #a7f3d0; font-size: 0.8125rem; padding: 0.4rem 0.75rem; border-radius: 6px; font-family: monospace; }
 </style>

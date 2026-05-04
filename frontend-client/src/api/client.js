@@ -16,5 +16,11 @@ export async function apiFetch(path, options = {}) {
   ) {
     headers.set('Content-Type', 'application/json')
   }
+  try {
+    const token = localStorage.getItem('gate_crown_client_token')
+    if (token && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${token}`)
+    }
+  } catch {}
   return fetch(apiUrl(path), { ...options, headers })
 }

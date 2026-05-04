@@ -1,6 +1,47 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { listProducts, searchProducts, askAssistant } from '../api/catalog'
+import { createOrder } from '../api/orders'
+import { useAuth } from '../composables/useAuth'
+
+const { isLoggedIn } = useAuth()
+
+// ── Order modal ───────────────────────────────────────────────────────────────
+const orderModal = ref(null)   // { product }
+const orderQty = ref(1)
+const orderNotes = ref('')
+const orderLoading = ref(false)
+const orderSuccess = ref(null) // success message string
+const orderError = ref('')
+
+function openOrder(product) {
+  orderModal.value = { product }
+  orderQty.value = 1
+  orderNotes.value = ''
+  orderSuccess.value = null
+  orderError.value = ''
+}
+
+function closeOrder() {
+  orderModal.value = null
+}
+
+async function submitOrder() {
+  orderLoading.value = true
+  orderError.value = ''
+  try {
+    const resp = await createOrder({
+      productId: orderModal.value.product.productId,
+      quantity: orderQty.value,
+      notes: orderNotes.value,
+    })
+    orderSuccess.value = resp.message
+  } catch (err) {
+    orderError.value = err.message || 'Failed to place order'
+  } finally {
+    orderLoading.value = false
+  }
+}
 
 const categories = [
   { value: '', label: 'All' },
@@ -165,6 +206,49 @@ function categoryColor(cat) {
           <span v-if="product.material" class="meta-chip">{{ product.material }}</span>
           <span v-if="product.dimensions" class="meta-chip">{{ product.dimensions }}</span>
         </div>
+        <button v-if="isLoggedIn" class="order-btn" @click="openOrder(product)">Place Order</button>
+        <RouterLink v-else :to="{ name: 'Login' }" class="order-btn order-btn-login">Sign in to order</RouterLink>
+      </div>
+    </div>
+
+    <!-- Order modal -->
+    <div v-if="orderModal" class="modal-overlay" @click.self="closeOrder">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Place Order</h3>
+          <button class="modal-close" @click="closeOrder">✕</button>
+        </div>
+
+        <div v-if="orderSuccess" class="order-success">
+          <div class="success-icon">✓</div>
+          <p class="success-title">Order sent!</p>
+          <p class="success-msg">{{ orderSuccess }}</p>
+          <button class="order-btn" style="margin-top:1rem;" @click="closeOrder">Close</button>
+        </div>
+
+        <template v-else>
+          <p class="modal-product-name">{{ orderModal.product.name }}</p>
+          <p v-if="orderModal.product.priceRange" class="modal-price">{{ orderModal.product.priceRange }}</p>
+
+          <div class="modal-field">
+            <label class="modal-label">Quantity</label>
+            <input v-model.number="orderQty" type="number" min="1" class="modal-input" />
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Notes <span class="optional">(optional)</span></label>
+            <textarea v-model="orderNotes" rows="3" class="modal-input" placeholder="Dimensions, colour, delivery requirements…" />
+          </div>
+
+          <p v-if="orderError" class="order-error">{{ orderError }}</p>
+
+          <div class="modal-actions">
+            <button class="cancel-btn" @click="closeOrder">Cancel</button>
+            <button class="order-btn" :disabled="orderLoading || orderQty < 1" @click="submitOrder">
+              <span v-if="orderLoading" class="btn-spinner" />
+              <span v-else>Send Order</span>
+            </button>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -286,6 +370,55 @@ function categoryColor(cat) {
 
 .btn-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.order-btn {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  margin-top: 0.75rem; width: 100%; padding: 0.5rem 1rem;
+  background: #059669; color: #fff; border: none; border-radius: 8px;
+  font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  text-decoration: none;
+}
+.order-btn:hover:not(:disabled) { background: #047857; }
+.order-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.order-btn-login { background: #6b7280; }
+.order-btn-login:hover { background: #4b5563; }
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-box {
+  background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.modal-title { font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0; }
+.modal-close { background: none; border: none; font-size: 1.125rem; color: #9ca3af; cursor: pointer; padding: 0.25rem; }
+.modal-close:hover { color: #374151; }
+.modal-product-name { font-size: 0.9375rem; font-weight: 600; color: #059669; margin: 0 0 0.2rem; }
+.modal-price { font-size: 0.8125rem; color: #6b7280; margin: 0 0 1rem; }
+.modal-field { margin-bottom: 0.875rem; }
+.modal-label { display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
+.optional { font-weight: 400; color: #9ca3af; }
+.modal-input {
+  width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9375rem; border: 1px solid #d1d5db;
+  border-radius: 8px; outline: none; box-sizing: border-box; font-family: inherit; resize: vertical;
+  transition: border-color 0.2s;
+}
+.modal-input:focus { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+.modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.modal-actions .order-btn { margin-top: 0; flex: 1; }
+.cancel-btn {
+  flex: 1; padding: 0.5rem 1rem; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db;
+  border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+}
+.cancel-btn:hover { background: #e5e7eb; }
+.order-error { font-size: 0.875rem; color: #ef4444; margin: 0.25rem 0 0; }
+
+.order-success { text-align: center; padding: 1rem 0; }
+.success-icon { width: 52px; height: 52px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #059669; margin: 0 auto 1rem; }
+.success-title { font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem; }
+.success-msg { font-size: 0.9375rem; color: #4b5563; line-height: 1.6; margin: 0; }
 
 /* Category badge colors */
 .bg-violet-100 { background: #ede9fe; }

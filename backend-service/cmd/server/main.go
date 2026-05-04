@@ -9,6 +9,7 @@ import (
 	"github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/backend-service/internal/catalog"
 	"github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/backend-service/internal/database"
 	"github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/backend-service/internal/middleware"
+	"github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/backend-service/internal/orders"
 	"github.com/sdsouz12/SER594-Team24-GateAndCrownB2B/backend-service/pkg/config"
 )
 
@@ -57,6 +58,17 @@ func main() {
 	{
 		catalogGroup.GET("/products", catalogHandler.ListProducts)
 		catalogGroup.POST("/search", catalogHandler.SemanticSearch)
+	}
+
+	// Orders
+	ordersRepo := orders.NewRepository(db)
+	ordersService := orders.NewService(ordersRepo)
+	ordersHandler := orders.NewHandler(ordersService)
+
+	ordersGroup := router.Group("/api/orders", middleware.AuthMiddleware(authService))
+	{
+		ordersGroup.POST("", ordersHandler.CreateOrder)
+		ordersGroup.GET("", ordersHandler.GetMyOrders)
 	}
 
 	// AI proxy (forwards to Python AI-service)

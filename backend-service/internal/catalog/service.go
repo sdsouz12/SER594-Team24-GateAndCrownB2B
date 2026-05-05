@@ -21,7 +21,12 @@ func (s *Service) ListProducts(ctx context.Context, category string) ([]*Product
 	return s.repo.ListProducts(ctx, category)
 }
 
-//Nurs code here
+func (s *Service) normalizeCategoryFilter(category string) string {
+	if category == "" {
+		return "all"
+	}
+	return category
+}
 
 type aiSearchRequest struct {
 	Query    string `json:"query"`

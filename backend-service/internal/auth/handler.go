@@ -92,6 +92,20 @@ func (h *Handler) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": me})
 }
 
+// ValidateSession handles GET /auth/session — checks if the current session token is still active.
+func (h *Handler) ValidateSession(c *gin.Context) {
+	caller, ok := ctxutil.GetCaller(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"valid": false})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"valid":   true,
+		"user_id": caller.UserId,
+	})
+}
+
 // UpdateMe handles PATCH /auth/me — profile and/or password for the authenticated user.
 func (h *Handler) UpdateMe(c *gin.Context) {
 	caller, ok := ctxutil.GetCaller(c)

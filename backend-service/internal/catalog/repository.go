@@ -44,7 +44,7 @@ func (r *Repository) ListProducts(ctx context.Context, category string) ([]*Prod
 		products = append(products, &p)
 	}
 	return products, rows.Err()
-//Pin functionality here is to get the product details by its ID. This will be used when user clicks on a product to view its details.
+}
 
 func (r *Repository) GetProductById(ctx context.Context, productId int64) (*Product, error) {
 	var p Product
@@ -60,7 +60,7 @@ func (r *Repository) GetProductById(ctx context.Context, productId int64) (*Prod
 }
 
 func (r *Repository) countProducts(ctx context.Context, category string) (int, error) {
-	query := SELECT COUNT(*) FROM catalog_product WHERE status = 'active'
+	query := `SELECT COUNT(*) FROM catalog_product WHERE status = 'active'`
 	args := []any{}
 	if category != "" {
 		query += " AND category = $1"

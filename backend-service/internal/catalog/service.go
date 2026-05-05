@@ -21,6 +21,8 @@ func (s *Service) ListProducts(ctx context.Context, category string) ([]*Product
 	return s.repo.ListProducts(ctx, category)
 }
 
+//Nurs code here
+
 type aiSearchRequest struct {
 	Query    string `json:"query"`
 	Category string `json:"category,omitempty"`

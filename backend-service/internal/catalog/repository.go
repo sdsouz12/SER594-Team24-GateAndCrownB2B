@@ -58,3 +58,18 @@ func (r *Repository) GetProductById(ctx context.Context, productId int64) (*Prod
 	}
 	return &p, nil
 }
+
+func (r *Repository) countProducts(ctx context.Context, category string) (int, error) {
+	query := SELECT COUNT(*) FROM catalog_product WHERE status = 'active'
+	args := []any{}
+	if category != "" {
+		query += " AND category = $1"
+		args = append(args, category)
+	}
+	var count int
+	err := r.db.QueryRow(ctx, query, args...).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("count products: %w", err)
+	}
+	return count, nil
+}
